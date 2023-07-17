@@ -1,0 +1,16 @@
+trigger: none
+
+
+resources:
+  pipelines:
+    - pipeline: pipelineUnderstanding
+      branch: master
+      source: kmadof.dm-so-47-multi-stage
+      trigger:
+        branches:
+          - master
+        stages:
+          - Build
+          - Deploy
+steps:
+- script: echo 'siema'

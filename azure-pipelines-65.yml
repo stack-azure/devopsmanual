@@ -1,0 +1,38 @@
+trigger: none
+
+pool:
+  name: Azure Pipelines
+  vmImage: ubuntu-latest
+
+variables:
+  - name: terraform-working-directory
+    value: '$(System.DefaultWorkingDirectory)/terraform/'
+
+stages :
+- stage: terraform
+  jobs:
+  - deployment: deploy_terraform
+    continueOnError: false
+    environment: 'dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - bash: |
+              echo "$(System.DefaultWorkingDirectory)/terraform/"
+              ls $(System.DefaultWorkingDirectory)
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+            displayName: 'install'
+            inputs:
+              terraformVersion: '0.14.11'
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'version'
+            inputs:
+              command: 'version'
+
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'init'
+            inputs:
+              workingDirectory: $(System.DefaultWorkingDirectory)/terraform/
+              command: 'init'
+              commandOptions: -backend=false

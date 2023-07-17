@@ -1,0 +1,1 @@
+az container create -g TheCodeManual --name myapp1 --image #{Image}# --registry-password #{RegistryPassword}# --registry-user #{RegistryUser}#

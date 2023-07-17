@@ -1,0 +1,16 @@
+# https://stackoverflow.com/questions/64537053/how-can-i-transform-an-xml-config-file-with-a-build-task-in-devops
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: FileTransform@1
+  inputs:
+    folderPath: $(Build.SourcesDirectory)/stackoverflow/76-config-transform/
+    enableXmlTransform: true
+    xmlTransformationRules: '-transform ApplicationInsights.Dev.config -xml ApplicationInsights.config'
+- bash: cat ApplicationInsights.config
+  workingDirectory: $(Build.SourcesDirectory)/stackoverflow/76-config-transform/

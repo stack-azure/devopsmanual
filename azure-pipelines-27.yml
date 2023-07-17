@@ -1,0 +1,43 @@
+# https://stackoverflow.com/questions/64650431/condition-or-with-variables-in-azure-devops-pipeline
+
+trigger: none
+pr: none
+
+variables:
+  isMaster: $[startsWith(variables['Build.SourceBranch'], 'refs/heads/master')]
+  isRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')]
+  isHotfix: $[startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix/')]
+  checkCondition: $[or(variables.isMaster, variables.isRelease)]
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: A
+  jobs:
+  - job: A1
+    steps:
+      - script: echo Hello Stage A!
+
+- stage: B
+  condition:  or(variables.isMaster ,variables.isRelease)
+  jobs:
+  - job: B1
+    steps:
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo %BUILD_SOURCEBRANCH%
+          echo %ISMASTER%
+          echo %ISRELEASE%
+          echo %ISHOTFIX%
+          echo %CHECKCONDITION%
+      condition: or(variables.isMaster ,variables.isRelease)
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo %BUILD_SOURCEBRANCH%
+          echo %ISMASTER%
+          echo %ISRELEASE%
+          echo %ISHOTFIX%
+          echo %CHECKCONDITION%

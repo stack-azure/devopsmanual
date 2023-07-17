@@ -1,0 +1,34 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - name: scheduled
+    value: $[eq(variables['Build.Reason'], 'Schedule')]
+  - name: manual
+    value: $[eq(variables['Build.Reason'], 'Manual')]
+
+steps:
+- bash: |
+    dow=$(date +%u)
+    echo $dow
+    is_monday=false
+    [ "$dow" == "1" ] && is_monday=true
+    echo $is_monday
+    echo "##vso[task.setvariable variable=isMonday]${is_monday}"
+
+- bash: |
+    echo "hello Monday"
+  condition: eq(variables.isMonday, true)
+- bash: |
+    echo "hello Manual"
+  condition: eq(variables.manual, true)
+- bash: |
+    echo "hello Manual Monday"
+  condition: and(eq(variables.manual, true), eq(variables.isMonday, true))
+- bash: |
+    echo $(isMonday)
+    echo $ISMONDAY
+    echo $(scheduled)

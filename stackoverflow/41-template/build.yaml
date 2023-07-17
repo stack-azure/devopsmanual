@@ -1,0 +1,33 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- bash: echo This script could use $SYSTEM_ACCESSTOKEN
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+- task: PowerShell@2
+  inputs:
+    pwsh: true
+    targetType: inline
+    script: ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\'
+- task: PowerShell@2
+  condition: succeeded()
+  displayName: "Create a list"
+  inputs:
+    targetType: 'inline'
+    script: |
+
+      $myList = New-Object System.Collections.ArrayList
+
+      $myList.Add("wow")
+
+      Write-Output ("##vso[task.setvariable variable=MyList;]$myList")
+
+- template: myRandomListTaskTemplate2.yml
+  parameters:
+    MyList: 
+    - item1
+    - item2

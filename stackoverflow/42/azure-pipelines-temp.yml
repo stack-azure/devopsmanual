@@ -1,0 +1,44 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+parameters:
+- name: image
+  displayName: Pool Image
+  type: string
+  default: Ubuntu
+  values:
+  - Windows
+  - Ubuntu
+  - MacOS
+  
+trigger: none
+
+variables:
+- name: Windows
+  value: windows-latest
+- name: Ubuntu
+  value: ubuntu-latest
+- name: MacOS
+  value: macOS-latest
+
+jobs:
+- job: build
+  displayName: build
+  pool: 
+    ${{ if eq(parameters.image, 'Ubuntu') }}:
+      vmImage: 'ubuntu-latest'
+    ${{ if eq(parameters.image, 'Windows') }}:
+      vmImage: 'windows-latest'
+    ${{ if eq(parameters.image, 'MacOS') }}:
+      vmImage: 'macOS-latest'
+  steps:
+  - script: echo building $(Build.BuildNumber) with ${{ parameters.image }}
+
+- job: build2
+  displayName: build2
+  pool: 
+    vmImage: ${{ variables['parameters.image'] }}
+  steps:
+  - script: echo building $(Build.BuildNumber) with ${{ parameters.image }}

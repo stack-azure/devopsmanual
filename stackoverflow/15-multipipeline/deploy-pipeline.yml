@@ -1,0 +1,18 @@
+resources:
+  pipelines:
+  - pipeline: buildpipeline
+    source: stackoverflow\kmadof.dm-so-15-a
+    trigger:
+      branches:
+        include:
+        - master
+        - feature/*
+
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: echo Deploy Step 
+  displayName: 'Deploy'

@@ -1,0 +1,31 @@
+# https://stackoverflow.com/questions/64020523/how-to-add-env-vars-into-azure-devops-pipeline
+
+trigger: none
+pr: none
+
+variables:
+  - group: PROD
+  - name: variableFromDeclaration
+    value: 'valueFromDeclaration'
+  - template: vars.yaml  
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: env | sort
+- script: | 
+    echo $VARIABLEFROMDECLARATION
+    echo $VARIABLEFROMGROUP
+    echo $VARIABLEFROMTEMPLATE
+- pwsh: |
+    
+    $url = "https://dev.azure.com/thecodemanual/$(System.TeamProject)/_apis/build/builds/$(Build.BuildId)?api-version=5.1"
+    $build = Invoke-RestMethod -Uri $url -Headers @{Authorization = "Bearer $env:MY_SECRET"}
+    Write-Host "Pipeline = $($build | ConvertTo-Json -Depth 100)"
+
+    $status = $build.status
+    Write-Host $status
+  name: initial
+  env: 
+    MY_SECRET: $(System.AccessToken)

@@ -1,0 +1,25 @@
+parameters:
+- name: Multiline
+  type: object
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- bash: |
+    echo "
+    ${{ parameters.Multiline }}
+    " >> script.txt
+    cat script.txt
+  continueOnError: true
+- bash: |
+    echo "
+    line 1,
+    line 2,
+    line 3,
+    line 4
+    line ...
+    " >> script2.txt
+    cat script2.txt

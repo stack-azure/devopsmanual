@@ -1,0 +1,96 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+#https://stackoverflow.com/questions/62043374/azure-replace-token-for-service-model-endpoint-for-asp-net-mvc-in-pipeline-relea/62044492#62044492
+
+steps:
+- bash:  echo $(Build.DefinitionName)
+
+- task: PowerShell@2
+  displayName: Set Variables
+  name: setVariables
+  inputs:
+    targetType: 'inline'
+    pwsh: true
+    script: |
+      $EnvVariable= "Value"
+
+      Write-Host "##vso[task.setvariable variable=EnvVariable;]$EnvVariable"
+
+      Write-Output "##vso[task.setvariable variable=EnvVariable;]$EnvVariable"
+
+- task: PowerShell@2
+  displayName: Read variables 0
+  inputs:
+    targetType: 'inline'
+    pwsh: true
+    script: |
+      Write-Host "env:EnvVariable : $($env:ENVVARIABLE)"
+
+      Write-Host "ENV:EnvVariable : $($ENV:ENVVARIABLE)"
+
+      Write-Output "env:EnvVariable : $($env:ENVVARIABLE)"
+
+      Write-Output "ENV:EnvVariable : $($ENV:ENVVARIABLE)"
+
+- task: PowerShell@2
+  displayName: Read variables 1
+  inputs:
+    targetType: 'inline'
+    pwsh: true
+    script: |
+      Get-ChildItem Env:
+      Write-Host "EnvVariable : $($EnvVariable)"
+      Write-Host "EnvVariable : $EnvVariable"
+      Write-Host "EnvVariable : $Env.EnvVariable"
+      Write-Host "EnvVariable : $($Env.EnvVariable)"
+      
+      Write-Host "ENVVARIABLE : $($ENVVARIABLE)"
+      Write-Host "ENVVARIABLE : $ENVVARIABLE"
+      Write-Host "ENVVARIABLE : $Env.ENVVARIABLE"
+      Write-Host "ENVVARIABLE : $($Env.ENVVARIABLE)"
+
+      Write-Host "env:EnvVariable : $($env:ENVVARIABLE)"
+
+      Write-Host "ENV:EnvVariable : $($ENV:ENVVARIABLE)"
+
+      Write-Output "env:EnvVariable : $($env:ENVVARIABLE)"
+
+      Write-Output "ENV:EnvVariable : $($ENV:ENVVARIABLE)"
+                          
+
+- task: PowerShell@2
+  displayName: Read variables 2
+  env:
+    EnvVariable: $(EnvVariable)
+  inputs:
+    targetType: 'inline'
+    pwsh: true
+    script: |
+      Write-Host "env:EnvVariable : $($env:EnvVariable)"
+
+      Write-Host "ENV:EnvVariable : $($ENV:EnvVariable)"
+
+      Write-Output "env:EnvVariable : $($env:EnvVariable)"
+
+      Write-Output "ENV:EnvVariable : $($ENV:EnvVariable)"
+      
+- task: replacetokens@3
+  inputs:
+    targetFiles: 'stackoverflow/38-endpoint-replace/Web.config'
+    encoding: 'auto'
+    writeBOM: true
+    actionOnMissing: 'warn'
+    keepToken: false
+    tokenPrefix: '#{'
+    tokenSuffix: '}#'
+    useLegacyPattern: false
+    enableTelemetry: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: 'stackoverflow/38-endpoint-replace/Web.config' 
+    artifactName: 'config' 

@@ -1,0 +1,17 @@
+#https://stackoverflow.com/questions/64961751/environment-variable-not-injected-into-multi-stage-docker-build-on-azure-devops
+name: docker-args
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- pwsh: ls 'stackoverflow/85-docker/'
+- task: Docker@2
+  inputs:
+    containerRegistry: 'devopsmanual-acr'
+    command: 'build'
+    Dockerfile: 'stackoverflow/85-docker/DOCKERFILE'
+    arguments: '--build-arg a_version=$(SomeVar)'

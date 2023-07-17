@@ -1,0 +1,44 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+#https://stackoverflow.com/questions/62044055/is-it-possible-to-cancel-a-azure-devops-pipeline-job-programmatically
+
+steps:
+- task: PowerShell@2
+  name: ConditionalStep
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "I'm here"
+      Write-Host ('$(SomeVariable)' -eq 'Stop')
+      if ('$(SomeVariable)' -eq 'Stop') {
+        $uri = "https://dev.azure.com/thecodemanual/DevOps Manual/_apis/build/builds/$(Build.BuildId)?api-version=5.1"
+
+        $json = @{status="Cancelling"} | ConvertTo-Json -Compress
+
+        $build = Invoke-RestMethod -Uri $uri -Method Patch -Headers @{Authorization = "Bearer $(System.AccessToken)"} -ContentType "application/json" -Body $json
+
+        Write-Host $build
+      }
+      Write-Host "And now here!"
+    pwsh: true
+- pwsh: Start-Sleep -Seconds 60    
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      $uri = "https://dev.azure.com/thecodemanual/DevOps Manual/_apis/build/builds/$(Build.BuildId)/timeline?api-version=5.1"
+
+      Write-Host $uri
+
+      # Invoke the REST call
+      $build = Invoke-RestMethod -Uri $uri -Method Get -Headers @{Authorization = "Bearer $(System.AccessToken)"} -ContentType "application/json"
+
+      $taskResult = $build.records | Where-Object {$_.name -eq "ConditionalStep" } | Select-Object result
+
+      Write-Host $taskResult.result
+
+    pwsh: true

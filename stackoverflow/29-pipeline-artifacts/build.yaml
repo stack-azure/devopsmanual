@@ -1,0 +1,36 @@
+trigger:
+  branches:
+    include:
+    - master
+    - refs/tags/*
+  paths:
+    include:
+    - stackoverflow/29-pipeline-artifacts/*
+
+# https://stackoverflow.com/questions/61812225/how-to-download-the-pipeline-artifacts-from-different-job-within-the-same-pipeli/61814969#61814969
+# no PR triggers
+pr:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: A
+  jobs:
+  - job: JA
+    steps:
+    - pwsh: |
+        $content = 'Awesome artifact'
+        New-Item -Path $(Build.ArtifactStagingDirectory) -Name "testsummary.md" -ItemType "file" -Value $content
+    - publish: $(Build.ArtifactStagingDirectory)
+      artifact: someArtifact
+      
+- stage: B
+  dependsOn: A
+  jobs:
+  - job: JB
+    steps:
+    - download: current
+      artifact: someArtifact
+    - bash: ls '$(Pipeline.Workspace)/someArtifact'

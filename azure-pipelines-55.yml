@@ -1,0 +1,24 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+
+- script: |
+    echo "##vso[task.setvariable variable=packages]{"name":"John","age":30,"cars":[ "Ford", "BMW", "Fiat" ]}"
+  displayName: 'Set variable'
+
+- script: |
+    echo "$(packages)"
+  displayName: 'Display variable'
+
+- powershell: |
+    $package = convertfrom-json '$(packages)'
+    Write-Host "$($package.name)"
+    Write-Host "$($package.age)"
+    $package.cars | foreach-object {
+      $car = $_
+      Write-Host "$($car)"
+    }

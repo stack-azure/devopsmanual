@@ -1,0 +1,40 @@
+parameters:
+- name: test
+  displayName: Run Tests?
+  type: boolean
+  default: true
+
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: A
+  jobs:
+  - job: Job_A
+    steps:
+    - bash: echo "Hello world stage A first job"
+    - ${{ if eq(parameters.test, true) }}:
+      - pwsh: throw "This is an error."
+  - job: Job_A_2
+    steps:
+    - bash: echo "Hello world stage A first job"
+    - ${{ if eq(parameters.test, false) }}:
+      - pwsh: throw "This is an error."
+  - job: Job_B
+    dependsOn: 'Job_A'
+    condition: failed('Job_A')
+    steps:
+    - bash: echo "Hello world stage A second job"
+   
+
+# stage B runs if A fails
+- stage: B
+  condition: always()
+  jobs:
+  - job:
+    steps:
+    - bash: echo "Hello world stage B first job"

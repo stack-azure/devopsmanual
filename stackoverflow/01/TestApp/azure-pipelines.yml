@@ -1,0 +1,52 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+- script: |
+    echo $(ConnectionStrings--DefaultConnection)
+  displayName: 'Run a one-line script'
+  condition: always()
+
+- script: |
+    echo $(ConnectionStrings:DefaultConnection)
+  displayName: 'Run a one-line script'
+  condition: always()
+
+- script: |
+    echo $(ConnectionStrings.DefaultConnection)
+  displayName: 'Run a one-line script'
+  condition: always()
+
+- task: NuGetToolInstaller@1
+  displayName: 'Use NuGet 5.5.1'
+  inputs:
+    versionSpec: 5.5.1
+
+- task: NuGetCommand@2
+  displayName: 'NuGet restore'
+  inputs:
+    restoreSolution: 'stackoverflow/01/TestApp/TestApp.sln'
+
+- task: VSBuild@1
+  inputs:
+    solution: 'stackoverflow/01/**/*.sln'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactstagingdirectory)\\"'
+    restoreNugetPackages: true
+
+- script: |
+    echo '$(build.artifactstagingdirectory)'
+    ls '$(build.artifactstagingdirectory)'
+  displayName: 'Run a multi-line script'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+    ArtifactName: 'SO-01'
+  condition: succeededOrFailed()

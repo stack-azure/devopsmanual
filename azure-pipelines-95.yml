@@ -1,0 +1,33 @@
+name:   PR-$(Build.SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.r)
+trigger:
+  - develop
+  - test 
+  - master
+pool:
+  vmImage: 'windows-latest'
+parameters:
+- name: BuildConfiguration
+  displayName: Build Configuration
+  default: Default
+  values:
+  - Debug
+  - Release
+  - Default
+
+variables:
+- name: buildConfiguration
+  ${{ if and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(parameters.BuildConfiguration, 'Default')) }}:
+    value: Debug
+  ${{ if and(eq(variables['Build.SourceBranch'], 'refs/heads/test'), eq(parameters.BuildConfiguration, 'Default')) }}:
+    value: Release
+  ${{ if and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(parameters.BuildConfiguration, 'Default')) }}:
+    value: Release
+  ${{ else }}:
+    value: ${{parameters.BuildConfiguration}}
+
+
+steps:
+- script: |
+    echo $(buildConfiguration)
+    echo $(Build.SourceBranch)
+

@@ -1,0 +1,27 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+- job: Test
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+    varOS: $(Agent.OS)
+  steps:
+    - bash: echo '$(Build.BuildNumber)'!
+    - pwsh: |
+        $testVar = ''
+        $test = '$(Test)'
+        if ($test -eq 'undefined' -or $test -eq '') {
+          $testVar = "Stage";
+        } elseif ($test -ne 'undefined' -and $test -ne '') {
+          $testVar = "Test";
+        }
+        Write-Host $testVar
+        Write-Host "##vso[task.setvariable variable=Release;isOutput=true]$testVar"
+      name: Initialize
+    - pwsh: |
+        echo '$(Initialize.Release)'

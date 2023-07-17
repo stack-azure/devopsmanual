@@ -1,0 +1,17 @@
+# https://stackoverflow.com/questions/67829317/how-to-use-powershell-7-from-azuredevops-with-aws-tools
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+steps:
+- powershell: $PSVersionTable.PSVersion
+- pwsh: $PSVersionTable.PSVersion
+- pwsh: |
+    '{ "key":"value1", "Key":"value2" }' | ConvertFrom-Json -AsHashtable
+- pwsh: Install-Module -name AWSPowerShell.NetCore -Scope CurrentUser -Force
+- pwsh: |
+    Import-Module AWSPowerShell.NetCore
+    Get-Module -ListAvailable
+
+    Get-AWSPowerShellVersion

@@ -1,0 +1,23 @@
+# https://stackoverflow.com/questions/63950046/printing-parameter-variables-in-azure-devops-template/63951973#63951973
+trigger: none
+
+# no PR triggers
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- bash: env | sort
+- task: AzureCLI@2
+  displayName: Azure CLI
+  inputs:
+    azureSubscription: rg-the-code-manual
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: |
+      $org = "https://dev.azure.com/thecodemanual/"
+      az devops login --organization $org
+      az pipelines variable list --org $org --project $(System.TeamProjectId) --pipeline-id $(System.DefinitionId)
+  env:
+    AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)

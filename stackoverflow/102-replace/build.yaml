@@ -1,0 +1,24 @@
+trigger: none
+
+pr: none
+
+strategy:
+  matrix:
+    linux:
+      imageName: 'ubuntu-latest'
+    mac:
+      imageName: 'macos-latest'
+    windows:
+      imageName: 'windows-latest'
+
+pool:
+  vmImage: $(imageName)
+
+variables:
+  - name: 'Server.Variable'
+    value: 'host\\path'
+
+steps:
+- template: template.yml
+  parameters:
+    Server: $(Server.Variable)

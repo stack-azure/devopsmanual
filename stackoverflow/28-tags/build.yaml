@@ -1,0 +1,61 @@
+trigger:
+  branches:
+    include:
+    - master
+    - refs/tags/*
+  paths:
+    include:
+    - stackoverflow/28-tags/*
+# https://stackoverflow.com/questions/61783014/using-lerna-js-and-azure-devops-pipeline/61786014?noredirect=1#comment109330301_61786014
+# https://stackoverflow.com/questions/61953776/how-to-combine-git-branch-and-tag-triggers-in-azure-pipelines
+# git tag release-05
+# git push origin --tags
+# no PR triggers
+pr:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+
+- stage: AA
+  jobs:
+  - job: JAA
+    steps:
+    - script: |
+        echo "This is job Foo."
+        echo $(System.PullRequest.TargetBranch)
+        echo $(Build.SourceBranch)
+        echo $(Build.SourceBranchName)
+        echo $(Build.Reason)
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: 'env | sort'
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          git branch
+        pwsh: true
+        workingDirectory: $(System.DefaultWorkingDirectory)
+
+- stage: A
+  condition: eq(variables['Build.SourceBranch'], 'master')
+  jobs:
+  - job: JA
+    steps:
+    - script: |
+        echo "This is job Foo."
+        echo $(System.PullRequest.TargetBranch)
+      
+
+#stage B runs if DetermineResult task set doThing variable n stage A
+- stage: B
+  dependsOn: A
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'), eq(variables['System.PullRequest.TargetBranch'], 'master')) # this will not work because System.PullRequest.TargetBranch is not avialable in template expressions
+  jobs:
+  - job: JB
+    steps:
+    - bash: echo "Deployment to production"

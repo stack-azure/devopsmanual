@@ -1,0 +1,53 @@
+trigger: none
+pr: none
+
+resources:
+- repo: self
+
+variables:
+  vmImageName: 'windows-latest'
+  AppName: 'MyApplication'
+  ApiAppName: 'AppName=MyApplication'
+  keyName: 'some'
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+    - job: Build
+      displayName: Build
+      pool:
+        vmImage: $(vmImageName)
+      steps:
+      - task: CmdLine@2
+        inputs:
+          script: |
+            ls -la
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'rg-the-code-manual'
+          scriptType: 'pscore'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            $secretValue =  az keyvault secret show --vault-name tcm-kv --name $(keyName) --query value
+            echo $secretValue
+            $secretValue =  az keyvault secret show --vault-name tcm-kv --name $(keyName) --query value -o tsv
+            echo $secretValue
+      
+          
+- stage: Deploy
+  displayName: Deploy Notebook Instance Stage
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    pool:
+      vmImage: $(vmImageName)
+    environment: 'development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: CmdLine@2
+              inputs:
+                script: echo Some debug text!

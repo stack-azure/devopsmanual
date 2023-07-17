@@ -1,0 +1,61 @@
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - stackoverflow/22-conditions/*
+
+pr: none
+
+variables:
+  orgName: 'thecodemanual'
+
+stages:
+- stage: Test
+  jobs:
+  - job: UnitTest
+    steps:
+    - script: echo UnitTest
+    - script: exit 1
+
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - script: echo Build
+
+- stage: Notify
+  dependsOn:
+  - Test
+  - Build
+
+  condition: succeededOrFailed()
+  jobs:
+  - job: InitialJob
+    condition: always()
+    steps:
+    - pwsh: |
+       
+        $url = "https://dev.azure.com/$(orgName)/$(System.TeamProject)/_apis/build/builds/$(Build.BuildId)/timeline?api-version=5.1"
+        $timeline = Invoke-RestMethod -Uri $url -Headers @{Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"}
+        Write-Host "Pipeline = $($timeline | ConvertTo-Json -Depth 100)"
+
+        $test = $timeline.records | where { $_.identifier -eq "Test.UnitTest" }
+
+        $result = $test.result
+
+        Write-Host "##vso[task.setvariable variable=testResult;isOutput=true]$result"
+      name: initial
+
+  - job: Succeed
+    dependsOn: InitialJob
+    condition: eq(dependencies.InitialJob.outputs['initial.testResult'], 'succeeded')
+    steps:
+    - script: echo Succeed #(slack)
+
+  - job: Fail
+    dependsOn: InitialJob
+    condition: eq(dependencies.InitialJob.outputs['initial.testResult'], 'failed')
+    steps:
+    - script: echo Fail #(slack)

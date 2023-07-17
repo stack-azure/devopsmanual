@@ -1,0 +1,79 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- bash: |
+    mkdir scripts
+    echo "echo 'from file'" > scripts/boot.sh
+    
+    ./scripts/boot.sh
+  continueOnError: true
+- bash: |
+    echo "echo 'from file 2'" > scripts/boot2.sh
+    chmod u=rwx boot2.sh
+    ./scripts/boot2.sh
+  continueOnError: true
+
+- bash: |
+    tar -czf "$(Build.StagingDirectory)/update2.tar.gz" *
+  workingDirectory: $(Build.SourcesDirectory)/scripts
+
+  
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)/scripts'
+    includeRootFolder: false
+    archiveType: "tar"
+    tarCompression: "gz"
+    archiveFile: "$(Build.StagingDirectory)/update.tar.gz"
+
+
+- task: ExtractFiles@1
+  inputs:
+    archiveFilePatterns: '$(Build.StagingDirectory)/update.tar.gz' 
+    destinationFolder: test
+    cleanDestinationFolder: true 
+
+- bash: |
+    ./test/boot.sh
+  continueOnError: true
+  displayName: 'Run extracted file using ArchiveFiles@2 and ExtractFiles@1'
+
+- bash: |
+    ./test/boot2.sh
+  continueOnError: true
+  displayName: 'Run extracted file with permission set before pack using ArchiveFiles@2 and ExtractFiles@1'
+
+- bash: |
+    ls '$(Build.StagingDirectory)'
+    mkdir test2
+    tar -xvf "$(Build.StagingDirectory)/update2.tar.gz" -C  '$(Build.SourcesDirectory)/test2'
+    ls
+    ls test2
+    ls test2/scripts
+  continueOnError: true
+
+- bash : ls
+- bash: |
+    ./test2/boot.sh
+  continueOnError: true
+  displayName: 'Run extracted file using tar'
+
+- bash: |
+    ./test2/boot2.sh
+  continueOnError: true
+  displayName: 'Run extracted file with permission set before pack using tar'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'

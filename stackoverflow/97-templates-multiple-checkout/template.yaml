@@ -1,0 +1,22 @@
+parameters:
+- name: jobName
+  type: string
+  default: 'Self'
+- name: checkoutRepository
+  type: step
+  default:
+    checkout: self
+- name: repositoryName
+  type: string
+  default: 'self'   
+
+jobs: 
+- job: ${{ parameters.jobName }}
+  displayName: ${{ parameters.jobName }}
+  steps:
+  - ${{ parameters.checkoutRepository }}
+  - bash: ls .
+- job: 'Repository${{ parameters.repositoryName }}'
+  steps:
+  - checkout: ${{ parameters.repositoryName }}
+  - bash: ls .

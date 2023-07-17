@@ -1,0 +1,24 @@
+# https://stackoverflow.com/questions/68587746/how-to-list-echo-all-variables-defined-in-azure-pipeline
+
+trigger: none 
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+- job: AX
+  variables:
+    AY: $[ convertToJson(variables) ]
+  steps:
+  - pwsh: |
+      $vars = @"
+      $(AY)
+      "@
+
+      Write-Host $vars
+      
+      $metadata = $vars | ConvertFrom-Json
+
+      $metadata | Get-Member -MemberType NoteProperty | % { $o = $metadata.($_.Name); Write-Host "##vso[task.setvariable variable=$($_.Name);isOutput=true]$o"
+      
+        

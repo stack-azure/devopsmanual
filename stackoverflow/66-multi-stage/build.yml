@@ -1,0 +1,45 @@
+# https://stackoverflow.com/questions/63996987/tagging-docker-containers-with-azure-pipelines
+
+parameters:
+- name: tagName
+  type: string
+  default: ' '
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+
+stages:
+- stage: A
+  jobs:
+  - job: A
+    steps:
+    - pwsh: |
+        $tagName = '$(Build.BuildId)'
+        if('${{ parameters.tagName }}' -ne ' ') {
+          $tagName = '${{ parameters.tagName }}'
+        }
+        echo $tagName
+
+  - job: B
+    steps:
+    - bash: echo "B"
+
+- stage: B
+  jobs:
+  - job: A
+    steps:
+    - pwsh: |
+        $tagName = '$(Build.BuildId)'
+        if('${{ parameters.tagName }}' -ne ' ') {
+          $tagName = '${{ parameters.tagName }}'
+        }
+        echo $tagName
+    - bash: exit 1
+
+  - job: B
+    steps:
+    - bash: echo "B"

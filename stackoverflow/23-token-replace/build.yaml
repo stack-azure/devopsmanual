@@ -1,0 +1,18 @@
+trigger: none
+pr: none
+
+# https://stackoverflow.com/questions/61734755/variable-substitution-in-config-json-files-in-azure-devops-pipeline/61736613#61736613
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps: 
+- task: replacetokens@3
+  displayName: 'Replace tokens in *.config *.json'
+  inputs:
+    targetFiles: |
+     stackoverflow/23-token-replace/*.config
+     stackoverflow/23-token-replace/*.json
+    verbosity: detailed
+    tokenPrefix: '{'
+    tokenSuffix: '}'

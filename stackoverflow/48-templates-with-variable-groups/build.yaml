@@ -1,0 +1,24 @@
+name: terrafrom-template
+
+trigger:
+- master
+
+# no PR triggers
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: my-variable-group
+- name: my-passed-variable
+  value: $[variables.myhello] # uses runtime expression
+
+steps:
+- template: template.yaml
+  parameters:
+    instances: 
+    - test1
+    - test2
+    server: $(myhello)
+    armConnection: $(armConnection)

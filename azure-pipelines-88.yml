@@ -1,0 +1,16 @@
+trigger: none
+
+pool:
+  name: Default
+  demands:
+  - agent.name -equals $(machinename)
+
+jobs:
+- job:
+  displayName: 'Job 1'
+  steps:
+  - task: Bash@3
+    inputs:
+      targetType: 'inline' 
+      script: |
+        echo "$(machinename)"

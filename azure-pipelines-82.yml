@@ -1,0 +1,18 @@
+trigger: none
+
+strategy:
+  matrix:
+    a_server:
+      service: "a-server"
+      imageName: "ubuntu-latest"
+    b_server:
+      service: "b-server"
+      imageName: "ubuntu-latest"
+  maxParallel: 2
+
+pool:
+  vmImage: $(imageName)
+
+steps:
+- script: | 
+    echo '$(service)'

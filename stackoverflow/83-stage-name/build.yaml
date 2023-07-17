@@ -1,0 +1,30 @@
+trigger: none
+pr: none
+
+variables: 
+  getCommitDate: $[format('{0:yyyyMMdd}', pipeline.startTime)]
+
+stages:
+- stage: dev
+  jobs:        
+    - template: template.yaml
+      parameters:
+        command: update
+        username: $(username_dev)
+        password: $(password_dev)
+        environment: development
+        databaseName: exampleDB
+        databaseIP: 123456789
+        context: dev
+        checkoutStep:
+          bash: git checkout sdfg345245234523dsdfg -- ./src/main/resources/objects
+
+    - template: template.yaml
+      parameters:
+        command: 'rollbackToDate date' # command: 'rollbackToDate $(getCommitDate)'
+        username: $(username_dev)
+        password: $(password_dev)
+        environment: development
+        databaseName: exampleDB
+        databaseIP: 123456789
+        context: dev

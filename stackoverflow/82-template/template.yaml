@@ -1,0 +1,16 @@
+parameters:
+- name: Proceed
+  type: boolean
+  default: true
+- name: CopySomething
+  type: string
+  default: 'dev'
+
+
+stages:
+- stage: Full
+  jobs:
+  - job: angularinstall
+    steps:
+    - script: echo "${{ parameters.Proceed }}"
+    - script: echo "${{ parameters.CopySomething }}"

@@ -1,0 +1,29 @@
+trigger:
+  branches:
+    exclude:
+      - '*'
+  tags:
+    include:
+    - v2.*
+    exclude:
+    - v2.0
+
+pr:
+  branches:
+    include:
+      - refs/tags/v2.*
+    exclude:
+      - 'refs/tags/v2.0'
+      - '*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: echo Hello, world!!
+  displayName: 'Run a one-line script'
+
+- script: |
+    echo Add other tasks to build, test, and deploy your project.
+    echo See https://aka.ms/yaml
+  displayName: 'Run a multi-line script'

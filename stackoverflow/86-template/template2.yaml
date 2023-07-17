@@ -1,0 +1,45 @@
+parameters:
+- name: 'variabaleTemplate'
+  default: 'variables.yaml'
+  type: string
+- name: 'someVariable'
+  type: string
+
+
+jobs:
+- job: BuildFromTemplate
+  dependsOn: []
+  variables:
+  - template: ${{parameters.variabaleTemplate}}
+  #- name: assemblyVersion
+  #  value: 1.2.3.4
+  - name: test
+    value: $[not(variables['assemblyVersion'])]
+  steps:
+#  - ${{if not(parameters.someVariable)}}:
+  - ${{if not(variables['assemblyVersion'])}}:
+    - task: PowerShell@2
+      continueOnError: true
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host $(assemblyVersion)
+          throw "assemblyVersion was not set"
+  - task: PowerShell@2
+    continueOnError: true
+    inputs:
+      targetType: 'inline'
+      script: |
+        $ver = '$(assemblyVersion)'
+        Write-Host "Ver: $($ver)"
+        if (!$ver)
+        {
+          throw "assemblyVersion was not set"
+        }
+  - task: PowerShell@2
+    continueOnError: true
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host $(assemblyVersion)
+        Write-Host $(test)

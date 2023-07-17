@@ -1,0 +1,24 @@
+# https://stackoverflow.com/questions/61676408/is-it-possible-to-import-a-script-in-a-yaml-template/61677662#61677662
+
+trigger: none
+pr: none
+
+resources:
+  repositories:
+    - repository: devops
+      type: github
+      name: kmadof/devops-templates
+      endpoint: kmadof
+
+stages:
+- template: templates/start.yaml@devops
+  parameters:
+    repo: devops-templates
+    buildSteps:
+      - checkout: self
+      - checkout: devops
+      - bash: echo Test #Passes
+        displayName: succeed
+      - bash: echo "Test"
+        displayName: succeed
+      - script: env | sort

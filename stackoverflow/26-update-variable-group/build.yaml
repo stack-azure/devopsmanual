@@ -1,0 +1,27 @@
+trigger: none
+pr: none
+
+# https://stackoverflow.com/questions/61799711/impossible-to-update-variable-from-variable-group-library/61800119#61800119
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  orgName: 'thecodemanual'
+  variableGroupId: 3
+
+steps: 
+- pwsh: |
+    
+    $url = "https://dev.azure.com/$(orgName)/$(System.TeamProject)/_apis/distributedtask/variablegroups/$(variableGroupId)?api-version=5.1-preview.1"
+    $variableGroup = Invoke-RestMethod -Uri $url -Headers @{Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"}
+    Write-Host "Pipeline = $($variableGroup | ConvertTo-Json -Depth 100)"
+
+    $variableGroup.variables.name.value = "fromPipeline"
+
+    $json = $variableGroup | ConvertTo-Json -Depth 100
+
+    Invoke-RestMethod -Method PUT -Uri $url -ContentType "application/json" -Headers @{Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"} -Body $json
+  name: initial
+  env:
+    SYSTEM_ACCESSTOKEN: $(system.accesstoken)

@@ -1,0 +1,18 @@
+parameters:
+- name: makeExplicitDependency
+  displayName: 'Make excplicit job dependency'
+  type: boolean
+  default: true
+
+jobs:
+- deployment: Deploy
+  ${{ if eq(parameters.makeExplicitDependency, true) }}:
+    dependsOn: Test
+  displayName: Deploy
+  environment: development
+  continueOnError: false
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - script: echo 'Deploy'

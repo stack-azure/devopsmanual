@@ -1,0 +1,18 @@
+trigger: none
+
+name: if-else
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  ${{ if endsWith( variables['Build.SourceBranchName'], 'master' ) }}: 
+    buildVersion: 'master'
+  ${{ else }}: 
+    buildVersion: 'none-master'
+
+steps:
+- script: |
+    echo "$(Build.SourceBranchName)"
+    echo "$(buildVersion)"
+  displayName: 'Display buildVersion'
